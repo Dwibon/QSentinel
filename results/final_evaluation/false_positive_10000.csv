@@ -1,0 +1,2 @@
+trials,sentinels_per_axis,baseline,alpha,accept,inconclusive,reject,accept_rate,inconclusive_rate,false_positive_rate
+10000,333,0.02,0.01,9728,271,1,0.9728,0.0271,0.0001
