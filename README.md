@@ -38,7 +38,7 @@ The fingerprint is calibrated against the expected honest-channel noise floor an
 - Backend API: https://qsentinel-api-oryt.onrender.com
 - Repository: https://github.com/Dwibon/QSentinel
 
-> **Demo note:** The QSentinel frontend and backend are deployed separately. If the live demo does not respond or shows a network/API error, temporarily disable any **ad blocker, privacy blocker, tracking protection, or similar browser extension** and reload the page. These extensions can sometimes block requests from the frontend to the QSentinel backend API.
+> **⚠️ Demo note:** The QSentinel frontend and backend are deployed separately. If the live demo does not respond or shows a network/API error, temporarily disable any **ad blocker, privacy blocker, tracking protection, or similar browser extension** and reload the page. These extensions can sometimes block requests from the frontend to the QSentinel backend API.
 
 ## Why QSentinel?
 
