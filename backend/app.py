@@ -35,6 +35,8 @@ app.add_middleware(
 
 EVENT_DIR = Path("logs")
 EVENT_FILE = EVENT_DIR / "qsentinel_events.jsonl"
+SIGNATURE_STORE = {}
+SESSION_MANAGER = SessionManager()
 
 
 class AttackSimulationRequest(BaseModel):
@@ -53,6 +55,19 @@ class AttackSimulationRequest(BaseModel):
         }
     )
     alpha: float = Field(default=0.01, gt=0, lt=1)
+
+
+class SignatureVerifyRequest(BaseModel):
+    signature: dict
+    message: str = "QSentinel demo message"
+    key: int = 12345
+    baseline: dict = Field(default_factory=lambda: {"X": 0.02, "Y": 0.02, "Z": 0.02})
+    attack: str = "none"
+    attack_strength: float = Field(default=1.0, ge=0, le=1)
+    noise_p: float = Field(default=0.03, ge=0, le=1)
+    alpha: float = Field(default=0.01, gt=0, lt=1)
+    verifier_id: str = "verifier"
+    registered_verifier_id: str = "verifier"
 
 
 class SignatureCreateRequest(BaseModel):
@@ -94,8 +109,11 @@ def log_event(event_type: str, result: dict, extra=None):
         "attack": result.get("attack"),
         "attack_strength": result.get("attack_strength"),
         "noise_p": result.get("noise_p"),
+        "sentinel_fraction": result.get("sentinel_fraction"),
         "fingerprint": result.get("fingerprint"),
+        "axis_results": result.get("axis_results"),
         "rejected_axes": result.get("rejected_axes", []),
+        "session_id": result.get("session_id"),
     }
 
     if extra:
@@ -173,11 +191,61 @@ def create_signature(request: SignatureCreateRequest):
         message_id=request.message_id,
         rng=np.random.default_rng(),
     )
+    SIGNATURE_STORE[signature["session_id"]] = signature
 
     return {
         "status": "created",
         "signature": public_signature(signature),
     }
+
+
+@app.post("/signature/verify")
+def verify_created_signature(request: SignatureVerifyRequest):
+    session_id = request.signature.get("session_id")
+    signature = SIGNATURE_STORE.get(session_id)
+    if signature is None:
+        raise HTTPException(status_code=404, detail="Signature session not found. Create a new signature first.")
+
+    result = verify_signature(
+        signature=signature,
+        message=request.message,
+        key=request.key,
+        baseline=request.baseline,
+        attack=request.attack,
+        attack_strength=request.attack_strength,
+        noise_p=request.noise_p,
+        alpha=request.alpha,
+        verifier_id=request.verifier_id,
+        registered_verifier_id=request.registered_verifier_id,
+        session_manager=SESSION_MANAGER,
+        rng=np.random.default_rng(),
+    )
+    log_event("signature_verification", result, {"session_id": session_id})
+    return public_result(result)
+
+
+@app.post("/signature/replay")
+def replay_created_signature(request: SignatureVerifyRequest):
+    session_id = request.signature.get("session_id")
+    signature = SIGNATURE_STORE.get(session_id)
+    if signature is None:
+        raise HTTPException(status_code=404, detail="Signature session not found. Create a new signature first.")
+
+    manager = SessionManager()
+    first = verify_signature(
+        signature=signature, message=request.message, key=request.key,
+        baseline=request.baseline, attack=request.attack, attack_strength=request.attack_strength,
+        noise_p=request.noise_p, alpha=request.alpha, verifier_id=request.verifier_id,
+        registered_verifier_id=request.registered_verifier_id, session_manager=manager, rng=np.random.default_rng()
+    )
+    second = verify_signature(
+        signature=signature, message=request.message, key=request.key,
+        baseline=request.baseline, attack=request.attack, attack_strength=request.attack_strength,
+        noise_p=request.noise_p, alpha=request.alpha, verifier_id=request.verifier_id,
+        registered_verifier_id=request.registered_verifier_id, session_manager=manager, rng=np.random.default_rng()
+    )
+    log_event("replay", second, {"session_id": session_id})
+    return {"first_verification": public_result(first), "replay_verification": public_result(second)}
 
 
 @app.post("/simulate")
