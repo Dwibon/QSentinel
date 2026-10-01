@@ -25,6 +25,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://dwibon.github.io",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -45,7 +46,11 @@ class AttackSimulationRequest(BaseModel):
     attack_strength: float = Field(default=1.0, ge=0, le=1)
     attack: str = "none"
     baseline: dict = Field(
-        default_factory=lambda: {"X": 0.02, "Y": 0.02, "Z": 0.02}
+        default_factory=lambda: {
+            "X": 0.02,
+            "Y": 0.02,
+            "Z": 0.02,
+        }
     )
     alpha: float = Field(default=0.01, gt=0, lt=1)
 
@@ -79,6 +84,7 @@ def public_result(result):
 
 def log_event(event_type: str, result: dict, extra=None):
     EVENT_DIR.mkdir(parents=True, exist_ok=True)
+
     event = {
         "timestamp": time.time(),
         "event": event_type,
@@ -91,13 +97,20 @@ def log_event(event_type: str, result: dict, extra=None):
         "fingerprint": result.get("fingerprint"),
         "rejected_axes": result.get("rejected_axes", []),
     }
+
     if extra:
         event.update(extra)
+
     with EVENT_FILE.open("a", encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
 
 
-def create_demo_signature(message, key, n_qubits, sentinel_fraction):
+def create_demo_signature(
+    message,
+    key,
+    n_qubits,
+    sentinel_fraction,
+):
     return generate_signature(
         message=message,
         n_qubits=n_qubits,
@@ -109,7 +122,12 @@ def create_demo_signature(message, key, n_qubits, sentinel_fraction):
     )
 
 
-def verify_demo(signature, request, verification_key=None, verifier_id="verifier"):
+def verify_demo(
+    signature,
+    request,
+    verification_key=None,
+    verifier_id="verifier",
+):
     return verify_signature(
         signature=signature,
         message=request.message,
@@ -128,12 +146,20 @@ def verify_demo(signature, request, verification_key=None, verifier_id="verifier
 
 @app.get("/")
 def root():
-    return {"service": "QSentinel", "status": "online", "docs": "/docs"}
+    return {
+        "service": "QSentinel",
+        "status": "online",
+        "docs": "/docs",
+    }
 
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "service": "QSentinel", "version": "1.0.0"}
+    return {
+        "status": "ok",
+        "service": "QSentinel",
+        "version": "1.0.0",
+    }
 
 
 @app.post("/signature/create")
@@ -147,25 +173,43 @@ def create_signature(request: SignatureCreateRequest):
         message_id=request.message_id,
         rng=np.random.default_rng(),
     )
-    return {"status": "created", "signature": public_signature(signature)}
+
+    return {
+        "status": "created",
+        "signature": public_signature(signature),
+    }
 
 
 @app.post("/simulate")
 def simulate(request: AttackSimulationRequest):
     signature = create_demo_signature(
-        request.message, request.key, request.n_qubits, request.sentinel_fraction
+        request.message,
+        request.key,
+        request.n_qubits,
+        request.sentinel_fraction,
     )
+
     result = verify_demo(signature, request)
+
     log_event("simulation", result)
-    return {"signature": public_signature(signature), "result": public_result(result)}
+
+    return {
+        "signature": public_signature(signature),
+        "result": public_result(result),
+    }
 
 
 @app.post("/simulate/replay")
 def simulate_replay(request: AttackSimulationRequest):
     signature = create_demo_signature(
-        request.message, request.key, request.n_qubits, request.sentinel_fraction
+        request.message,
+        request.key,
+        request.n_qubits,
+        request.sentinel_fraction,
     )
+
     manager = SessionManager()
+
     first = verify_signature(
         signature=signature,
         message=request.message,
@@ -176,6 +220,7 @@ def simulate_replay(request: AttackSimulationRequest):
         session_manager=manager,
         rng=np.random.default_rng(),
     )
+
     second = verify_signature(
         signature=signature,
         message=request.message,
@@ -186,7 +231,9 @@ def simulate_replay(request: AttackSimulationRequest):
         session_manager=manager,
         rng=np.random.default_rng(),
     )
+
     log_event("replay", second)
+
     return {
         "first_verification": public_result(first),
         "replay_verification": public_result(second),
@@ -196,8 +243,12 @@ def simulate_replay(request: AttackSimulationRequest):
 @app.post("/simulate/unauthorized")
 def simulate_unauthorized(request: AttackSimulationRequest):
     signature = create_demo_signature(
-        request.message, request.key, request.n_qubits, request.sentinel_fraction
+        request.message,
+        request.key,
+        request.n_qubits,
+        request.sentinel_fraction,
     )
+
     result = verify_signature(
         signature=signature,
         message=request.message,
@@ -210,13 +261,16 @@ def simulate_unauthorized(request: AttackSimulationRequest):
         session_manager=SessionManager(),
         rng=np.random.default_rng(),
     )
+
     log_event("unauthorized_verifier", result)
+
     return public_result(result)
 
 
 @app.post("/simulate/forgery")
 def simulate_forgery(request: AttackSimulationRequest):
     """Attacker creates a signature using a wrong key; verifier uses the legitimate key."""
+
     legitimate_key = request.key
     attacker_key = request.key + 99991
 
@@ -239,18 +293,29 @@ def simulate_forgery(request: AttackSimulationRequest):
         session_manager=SessionManager(),
         rng=np.random.default_rng(),
     )
+
     result["attack"] = "forgery"
     result["attack_type"] = "forged signature"
     result["protocol_decision"] = "FORGED_SIGNATURE"
+
     if result.get("final_decision") != "REPLAY":
         result["final_decision"] = "REJECT"
-    log_event("forgery", result, {"attack_type": "forged_signature"})
+
+    log_event(
+        "forgery",
+        result,
+        {
+            "attack_type": "forged_signature",
+        },
+    )
+
     return public_result(result)
 
 
 @app.post("/simulate/impersonation")
 def simulate_impersonation(request: AttackSimulationRequest):
     """Attacker claims to be the signer and creates a signature with an unknown key."""
+
     legitimate_key = request.key
     attacker_key = request.key + 199983
 
@@ -273,33 +338,50 @@ def simulate_impersonation(request: AttackSimulationRequest):
         session_manager=SessionManager(),
         rng=np.random.default_rng(),
     )
+
     result["attack"] = "signer_impersonation"
     result["attack_type"] = "signer impersonation"
     result["claimed_signer"] = "legitimate_signer"
     result["actual_signer"] = "attacker"
     result["protocol_decision"] = "SIGNER_ID_MISMATCH"
+
     if result.get("final_decision") != "REPLAY":
         result["final_decision"] = "REJECT"
-    log_event("signer_impersonation", result, {
-        "attack_type": "signer_impersonation",
-        "claimed_signer": "legitimate_signer",
-        "actual_signer": "attacker",
-    })
+
+    log_event(
+        "signer_impersonation",
+        result,
+        {
+            "attack_type": "signer_impersonation",
+            "claimed_signer": "legitimate_signer",
+            "actual_signer": "attacker",
+        },
+    )
+
     return public_result(result)
 
 
 @app.get("/events")
 def events(limit: int = 100):
     if limit < 1 or limit > 1000:
-        raise HTTPException(status_code=400, detail="limit must be between 1 and 1000")
+        raise HTTPException(
+            status_code=400,
+            detail="limit must be between 1 and 1000",
+        )
+
     if not EVENT_FILE.exists():
         return {"events": []}
+
     lines = EVENT_FILE.read_text(encoding="utf-8").splitlines()
+
     output = []
+
     for line in lines[-limit:]:
         try:
             output.append(json.loads(line))
         except json.JSONDecodeError:
             continue
+
     output.reverse()
+
     return {"events": output}
