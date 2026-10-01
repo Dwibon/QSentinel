@@ -315,7 +315,7 @@ function App() {
         key: secretKey,
         attack: verificationAttack,
         attack_strength: strength,
-        noise,
+        noise_p: noise,
         verifier_id: verifierId,
       });
       showResult(data, `${attackNames[verificationAttack] || verificationAttack} verification`);
