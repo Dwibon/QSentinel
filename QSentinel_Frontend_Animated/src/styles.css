@@ -587,3 +587,24 @@
      .site:has(.form-block):not(:has(:is(.lab-controls,.log-tools,.log-table))) .page-head::after,
      .site:has(:is(.log-tools,.log-table)):not(:has(.lab-controls)) .page-head::after{display:none}
    }
+   /* ---- FIX: attack-test buttons readable before hover (dark card) ---- */
+.dark-card .outline-btn,
+.dark-card .dark-outline,
+.dark-outline{
+  color:#fff;
+  background:transparent;
+  border:2px solid rgba(255,255,255,.55);
+}
+.dark-card .outline-btn:disabled,
+.dark-card .dark-outline:disabled{
+  color:rgba(255,255,255,.4);
+  border-color:rgba(255,255,255,.2);
+}
+/* keyboard focus gets the same lime look as hover */
+.dark-card .outline-btn:focus-visible,
+.dark-card .dark-outline:focus-visible{
+  outline:none;
+  color:var(--lime);
+  border-color:var(--lime);
+  box-shadow:4px 4px 0 var(--lime);
+}
