@@ -55,8 +55,19 @@ const DEMO_RESULTS = {
 };
 
 function path() {
+  const params = new URLSearchParams(window.location.search);
+  const redirectedRoute = params.get("route");
+
+  if (redirectedRoute) {
+    return redirectedRoute.replace(/\/$/, "") || "/";
+  }
+
   let current = window.location.pathname;
-  if (current.startsWith(BASE_PATH)) current = current.slice(BASE_PATH.length);
+
+  if (current.startsWith(BASE_PATH)) {
+    current = current.slice(BASE_PATH.length);
+  }
+
   return current.replace(/\/$/, "") || "/";
 }
 

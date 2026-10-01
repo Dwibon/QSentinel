@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <script>
+    const path = window.location.pathname;
+    const base = "/QSentinel";
+
+    if (path.startsWith(base)) {
+      const route = path.slice(base.length) || "/";
+      const query = window.location.search;
+      const hash = window.location.hash;
+
+      window.location.replace(
+        `${base}/?route=${encodeURIComponent(route)}${query ? "&" + query.slice(1) : ""}${hash}`
+      );
+    }
+  </script>
+</head>
+<body></body>
+</html>
