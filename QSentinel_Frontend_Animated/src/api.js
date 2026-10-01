@@ -8,13 +8,13 @@ export const defaults = {
   noise_p: 0.03,
   attack_strength: 1,
   baseline: { X: 0.02, Y: 0.02, Z: 0.02 },
-  alpha: 0.01
+  alpha: 0.01,
 };
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
-    ...options
+    ...options,
   });
   let data = {};
   try { data = await response.json(); } catch { data = {}; }
@@ -25,10 +25,7 @@ async function request(path, options = {}) {
 export const health = () => request("/health");
 
 export function simulate(attack = "none", overrides = {}) {
-  return request("/simulate", {
-    method: "POST",
-    body: JSON.stringify({ ...defaults, attack, ...overrides })
-  });
+  return request("/simulate", { method: "POST", body: JSON.stringify({ ...defaults, attack, ...overrides }) });
 }
 
 export function replay() {
@@ -50,8 +47,8 @@ export function createSignature(values = {}) {
       n_qubits: Number(values.n_qubits ?? defaults.n_qubits),
       sentinel_fraction: Number(values.sentinel_fraction ?? defaults.sentinel_fraction),
       nonce,
-      message_id: messageId
-    })
+      message_id: messageId,
+    }),
   });
 }
 
@@ -68,11 +65,35 @@ export function verifySignature(values = {}) {
       noise_p: Number(values.noise_p ?? defaults.noise_p),
       alpha: Number(values.alpha ?? defaults.alpha),
       verifier_id: values.verifier_id ?? "verifier",
-      registered_verifier_id: values.registered_verifier_id ?? "verifier"
-    })
+      registered_verifier_id: values.registered_verifier_id ?? "verifier",
+    }),
   });
 }
 
-export function getEvents(limit = 100) {
-  return request(`/events?limit=${limit}`);
+export function replaySignature(values = {}) {
+  return request("/signature/replay", {
+    method: "POST",
+    body: JSON.stringify({
+      signature: values.signature,
+      message: values.message ?? defaults.message,
+      key: Number(values.key ?? defaults.key),
+      baseline: values.baseline ?? defaults.baseline,
+      attack: values.attack ?? "none",
+      attack_strength: Number(values.attack_strength ?? defaults.attack_strength),
+      noise_p: Number(values.noise_p ?? defaults.noise_p),
+      alpha: Number(values.alpha ?? defaults.alpha),
+      verifier_id: values.verifier_id ?? "verifier",
+      registered_verifier_id: values.registered_verifier_id ?? "verifier",
+    }),
+  });
 }
+
+export function forgery() {
+  return request("/simulate/forgery", { method: "POST", body: JSON.stringify(defaults) });
+}
+
+export function impersonation() {
+  return request("/simulate/impersonation", { method: "POST", body: JSON.stringify(defaults) });
+}
+
+export function getEvents(limit = 1000) { return request(`/events?limit=${limit}`); }
