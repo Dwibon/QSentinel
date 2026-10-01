@@ -2,7 +2,7 @@
 
 <div align="center">
 
-**SIH 2026 · Problem Statement 26141 · Team OK Computer**
+
 
 A non-ML statistical threat-detection framework for teleportation-based Quantum Digital Signatures (QDS).
 
