@@ -433,48 +433,15 @@ Key research areas include:
 - Wilson confidence intervals
 - Quantum adversarial/channel attack models
 
-# Future Work
-
-- Validation on actual quantum hardware
-- Broader quantum-channel models
-- More sophisticated correlated/adaptive attacks
-- Formal security analysis
-- Adaptive calibration and drift handling
-- Larger-scale statistical power studies
-- Integration with a complete QDS protocol implementation
-- Hardware-backed verifier authentication
-- Additional quantum observables beyond the three Pauli axes
 
 # Acknowledgements
 
 QSentinel was developed as a prototype for **Smart India Hackathon 2026**, under the **Blockchain and Cybersecurity** theme.
-
-# Project Status
-
-**Prototype status: Functional**
-
-The current implementation includes:
-
-- Teleportation simulation
-- QDS signature generation and verification
-- Session-bound secret sentinel schedules
-- X/Y/Z sentinel measurements
-- Statistical threat detection
-- Multiple attack simulations
-- Replay and authorization checks
-- Forgery and impersonation simulations
-- FastAPI backend
-- React verification interface
-- Threat Lab
-- Automated test suite
-- Public deployment
 
 ---
 
 <div align="center">
 
 **QSentinel · Team OK Computer · SIH 2026**
-
-*Statistical evidence for quantum threats — without machine learning.*
 
 </div>
