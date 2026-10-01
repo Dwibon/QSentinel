@@ -17,6 +17,18 @@ A non-ML statistical threat-detection framework for teleportation-based Quantum 
 
 ---
 
+# Live Prototype
+
+- Frontend: https://dwibon.github.io/QSentinel/
+- Verification interface: https://dwibon.github.io/QSentinel/verify
+- Backend API: https://qsentinel-api-oryt.onrender.com
+- Repository: https://github.com/Dwibon/QSentinel
+
+> [!NOTE]
+> **⚠️ Demo:** The QSentinel frontend and backend are deployed separately. If the live demo does not respond or shows a network/API error, temporarily disable any **ad blocker, privacy blocker, tracking protection, or similar browser extension** and reload the page. These extensions can sometimes block requests from the frontend to the QSentinel backend API.
+
+> **Backend wake-up time:** QSentinel's backend is deployed using Render's free tier. After a period of inactivity, the backend may temporarily go inactive. If the website appears inactive or the first request does not respond immediately, please wait approximately **50 seconds to 1 minute** for the backend to wake up, then refresh the page and try again. Subsequent requests should work normally.
+
 ## Overview
 
 **QSentinel** is a simulation-based, non-machine-learning security layer for teleportation-based Quantum Digital Signature (QDS).
@@ -31,14 +43,6 @@ The fingerprint is calibrated against the expected honest-channel noise floor an
 
 > **Scope:** QSentinel is a simulation and prototype system. Its statistical detection results are conditional on the stated channel, attack, calibration, and experimental assumptions. It is **not a formal quantum-security proof**.
 
-# Live Prototype
-
-- Frontend: https://dwibon.github.io/QSentinel/
-- Verification interface: https://dwibon.github.io/QSentinel/verify
-- Backend API: https://qsentinel-api-oryt.onrender.com
-- Repository: https://github.com/Dwibon/QSentinel
-
-> **⚠️ Demo note:** The QSentinel frontend and backend are deployed separately. If the live demo does not respond or shows a network/API error, temporarily disable any **ad blocker, privacy blocker, tracking protection, or similar browser extension** and reload the page. These extensions can sometimes block requests from the frontend to the QSentinel backend API.
 
 ## Why QSentinel?
 
