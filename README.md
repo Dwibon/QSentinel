@@ -31,6 +31,19 @@ The fingerprint is calibrated against the expected honest-channel noise floor an
 
 > **Scope:** QSentinel is a simulation and prototype system. Its statistical detection results are conditional on the stated channel, attack, calibration, and experimental assumptions. It is **not a formal quantum-security proof**.
 
+# Live Prototype
+
+- Frontend: https://dwibon.github.io/QSentinel/
+- Verification interface: https://dwibon.github.io/QSentinel/verify
+- Backend API: https://qsentinel-api-oryt.onrender.com
+- Repository: https://github.com/Dwibon/QSentinel
+
+## ⚠️ Demo Troubleshooting
+
+The QSentinel frontend and backend are deployed separately. If the live demo does not respond or shows a network/API error, temporarily disable your browser's **ad blocker, privacy blocker, tracking protection, or similar browser extensions** for the demo and reload the page.
+
+These extensions can sometimes block requests from the frontend to the QSentinel backend API. The application itself does not require or serve advertisements.
+
 ## Why QSentinel?
 
 A conventional single-QBER measurement can indicate that something changed in a quantum channel, but it does not directly describe how the error is distributed across the Pauli axes.
@@ -317,13 +330,6 @@ Current test status:
 ```text
 78 passed
 ```
-
-# Live Prototype
-
-- Frontend: https://dwibon.github.io/QSentinel/
-- Verification interface: https://dwibon.github.io/QSentinel/verify
-- Backend API: https://qsentinel-api-oryt.onrender.com
-- Repository: https://github.com/Dwibon/QSentinel
 
 # API
 
