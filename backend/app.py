@@ -1,9 +1,10 @@
 import json
 import time
+from contextvars import ContextVar
 from pathlib import Path
 
 import numpy as np
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -37,6 +38,16 @@ EVENT_DIR = Path("logs")
 EVENT_FILE = EVENT_DIR / "qsentinel_events.jsonl"
 SIGNATURE_STORE = {}
 SESSION_MANAGER = SessionManager()
+CLIENT_ID = ContextVar("qsentinel_client_id", default=None)
+
+
+@app.middleware("http")
+async def client_session_middleware(request: Request, call_next):
+    token = CLIENT_ID.set(request.headers.get("X-QSentinel-Client-ID"))
+    try:
+        return await call_next(request)
+    finally:
+        CLIENT_ID.reset(token)
 
 
 class AttackSimulationRequest(BaseModel):
@@ -114,6 +125,7 @@ def log_event(event_type: str, result: dict, extra=None):
         "axis_results": result.get("axis_results"),
         "rejected_axes": result.get("rejected_axes", []),
         "session_id": result.get("session_id"),
+        "client_id": CLIENT_ID.get(),
     }
 
     if extra:
@@ -442,11 +454,17 @@ def events(limit: int = 100):
 
     lines = EVENT_FILE.read_text(encoding="utf-8").splitlines()
 
+    client_id = CLIENT_ID.get()
+    if not client_id:
+        return {"events": []}
+
     output = []
 
     for line in lines[-limit:]:
         try:
-            output.append(json.loads(line))
+            event = json.loads(line)
+            if event.get("client_id") == client_id:
+                output.append(event)
         except json.JSONDecodeError:
             continue
 
