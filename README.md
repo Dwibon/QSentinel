@@ -401,6 +401,36 @@ The intended contribution is the integrated system-level methodology:
 7. Evaluation across multiple attack classes
 8. A working end-to-end software prototype and verification interface
 
+
+# Documentation and References
+
+The repository is accompanied by detailed technical documentation and SIH presentation materials covering the system architecture, mathematical model, threat model, implementation, experiments, and limitations.
+
+Key research areas include:
+
+- Quantum digital signatures
+- Teleportation-based quantum communication
+- Quantum authentication and trap/decoy-state techniques
+- Pauli operations and Pauli twirling
+- Quantum channel characterization
+- Statistical hypothesis testing
+- Exact binomial tests
+- Wilson confidence intervals
+- Quantum adversarial/channel attack models
+
+
+# Future Work
+
+- Validation on actual quantum hardware
+- Broader quantum-channel models
+- More sophisticated correlated/adaptive attacks
+- Formal security analysis
+- Adaptive calibration and drift handling
+- Larger-scale statistical power studies
+- Integration with a complete QDS protocol implementation
+- Hardware-backed verifier authentication
+- Additional quantum observables beyond the three Pauli axes
+
 # Team — OK Computer
 
 | Member |
@@ -422,22 +452,6 @@ The intended contribution is the integrated system-level methodology:
 | Problem Statement | **Quantum-Inspired Cyber Threat Detection for Digital Signature Security** |
 | Theme | **Blockchain and Cybersecurity** |
 | Project | **QSentinel** |
-
-# Documentation and References
-
-The repository is accompanied by detailed technical documentation and SIH presentation materials covering the system architecture, mathematical model, threat model, implementation, experiments, and limitations.
-
-Key research areas include:
-
-- Quantum digital signatures
-- Teleportation-based quantum communication
-- Quantum authentication and trap/decoy-state techniques
-- Pauli operations and Pauli twirling
-- Quantum channel characterization
-- Statistical hypothesis testing
-- Exact binomial tests
-- Wilson confidence intervals
-- Quantum adversarial/channel attack models
 
 
 # Acknowledgements
