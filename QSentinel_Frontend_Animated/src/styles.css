@@ -609,3 +609,108 @@
   box-shadow:4px 4px 0 var(--lime);
 }
 .reviewer{display:none}
+/* ============================================================
+   QSENTINEL FX PACK — appended; nothing above was modified.
+   Cursor glow, 3D card tilt, marquee ticker, loading bar,
+   custom sliders, animated verdicts, hero parallax, live grid.
+   ============================================================ */
+
+
+/* ---------- GLOBAL LOADING BAR (shows while any request runs) ---------- */
+.load-bar{position:fixed;top:0;left:0;right:0;height:5px;z-index:60;pointer-events:none;opacity:0;transition:opacity .25s;background:repeating-linear-gradient(90deg,var(--lime) 0 24px,var(--ink) 24px 48px);background-size:48px 100%}
+.load-bar.on{opacity:1;animation:qsLoadMarch .6s linear infinite}
+@keyframes qsLoadMarch{to{background-position:48px 0}}
+
+/* ---------- HERO PARALLAX (follows the mouse) ---------- */
+.hero-home .hero-geom{translate:calc((var(--mx,.5) - .5) * -60px) calc((var(--my,.5) - .5) * -36px);transition:translate .35s var(--ease-out)}
+.hero-home::before{translate:calc((var(--mx,.5) - .5) * 34px) calc((var(--my,.5) - .5) * 22px)}
+.hero-home .hero-badge{translate:calc((var(--mx,.5) - .5) * 24px) calc((var(--my,.5) - .5) * 16px)}
+
+/* ---------- MARQUEE TICKER ---------- */
+.ticker{position:relative;display:grid;gap:4px;padding:14px 0;overflow:hidden;background:var(--paper);border-block:2px solid var(--ink);-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.ticker-row{display:flex;width:max-content;animation:qsMarquee 38s linear infinite}
+.ticker-row.rev{animation-direction:reverse;animation-duration:46s}
+.ticker-row span{white-space:nowrap;font-weight:900;font-size:clamp(28px,4.4vw,56px);line-height:1.05;letter-spacing:-.04em;padding-right:.55em;transition:background .2s,color .2s}
+.ticker-row span::after{content:"✦";margin-left:.55em;font-size:.55em;vertical-align:.12em;color:var(--lime);-webkit-text-stroke:1.5px var(--ink)}
+.ticker-row.rev span{color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+.ticker-row span:hover{background:var(--lime);color:var(--ink);-webkit-text-stroke:0}
+.ticker:hover .ticker-row{animation-play-state:paused}
+@keyframes qsMarquee{to{transform:translateX(-50%)}}
+
+/* ---------- 3D TILT + GLARE CARDS (pointer position set from JS) ---------- */
+.move-card,.method-flow>div,.quick-start>div{--rx:0deg;--ry:0deg;--gx:50%;--gy:50%}
+.method-flow>div,.quick-start>div{position:relative}
+.move-card::after,.method-flow>div::after,.quick-start>div::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--gx) var(--gy),rgba(255,255,255,.55),transparent 60%)}
+.move-card:hover::after,.method-flow>div:hover::after,.quick-start>div:hover::after{opacity:1}
+.move-card{transition:transform .18s ease-out,box-shadow .3s,background-size .45s var(--ease-out)}
+.move-card:hover{transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) translateY(-5px)}
+.method-flow>div{transition:translate .3s var(--ease-out),box-shadow .3s var(--ease-out),transform .18s ease-out}
+.method-flow>div:hover{transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry))}
+.quick-start>div{transition:background-size .45s var(--ease-out),color .3s,translate .3s var(--ease-out),transform .18s ease-out}
+.quick-start>div:hover{transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry))}
+
+/* ---------- LIVE GRID BEHIND THE DARK "THREE STATES" SECTION ---------- */
+.inconclusive-section{position:relative;isolation:isolate}
+.inconclusive-section::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(rgba(183,255,74,.08) 1px,transparent 1px) 0 0/48px 48px,linear-gradient(90deg,rgba(183,255,74,.08) 1px,transparent 1px) 0 0/48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse at 72% 40%,#000,transparent 75%);mask-image:radial-gradient(ellipse at 72% 40%,#000,transparent 75%);
+  animation:qsGridDrift 12s linear infinite}
+@keyframes qsGridDrift{to{background-position:48px 48px,48px 48px}}
+
+/* ---------- ATTACK TABLE: live status dots ---------- */
+.attack-row strong::before{content:"";display:inline-block;width:8px;height:8px;margin-right:9px;vertical-align:1px;background:currentColor}
+.attack-row strong.bad::before{animation:qsBlink 1s steps(1) infinite}
+.attack-row strong.good::before{border-radius:50%;animation:qsPing 2s ease-out infinite}
+
+/* ---------- VERDICT BANNER: each verdict gets its own signature motion ---------- */
+.verdict-banner{position:relative;overflow:hidden}
+.verdict-banner>*{position:relative;z-index:1}
+.verdict-banner::after{content:"";position:absolute;pointer-events:none;z-index:0}
+.verdict-banner.good::after{inset:0;background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.75) 50%,transparent 65%);translate:-130% 0;animation:qsShine 3.5s .8s ease-in-out infinite}
+.verdict-banner.bad::after{left:0;right:0;bottom:0;height:9px;background:repeating-linear-gradient(-45deg,var(--red) 0 10px,transparent 10px 20px);animation:qsTape 1s linear infinite}
+.verdict-banner.warn::after{inset:0;border:3px solid var(--yellow);animation:qsSoftBlink 1.8s ease-in-out infinite}
+@keyframes qsSoftBlink{50%{opacity:.12}}
+.verdict-main{font-variant-numeric:tabular-nums}
+
+/* ---------- CUSTOM RANGE SLIDERS (uses the --range-pct your JSX already sets) ---------- */
+.slider input[type="range"]{-webkit-appearance:none;appearance:none;height:18px;background:transparent;cursor:pointer;--fill:var(--ink);--rail:#cfcfc6;--thumb:var(--lime);--thumb-edge:var(--ink)}
+.slider-dark input[type="range"]{--fill:var(--lime);--rail:#444;--thumb:var(--lime);--thumb-edge:#fff}
+.slider input[type="range"]:focus{outline:none}
+.slider input[type="range"]::-webkit-slider-runnable-track{height:6px;background:linear-gradient(90deg,var(--fill) var(--range-pct,50%),var(--rail) var(--range-pct,50%))}
+.slider input[type="range"]::-moz-range-track{height:6px;background:var(--rail)}
+.slider input[type="range"]::-moz-range-progress{height:6px;background:var(--fill)}
+.slider input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;margin-top:-6px;background:var(--thumb);border:2px solid var(--thumb-edge);border-radius:0;rotate:45deg;transition:scale .2s var(--ease-pop),box-shadow .2s}
+.slider input[type="range"]::-moz-range-thumb{width:14px;height:14px;background:var(--thumb);border:2px solid var(--thumb-edge);border-radius:0;rotate:45deg;transition:scale .2s var(--ease-pop),box-shadow .2s}
+.slider input[type="range"]:not(:disabled):hover::-webkit-slider-thumb,.slider input[type="range"]:focus-visible::-webkit-slider-thumb{scale:1.25;box-shadow:0 0 0 6px rgba(183,255,74,.45)}
+.slider input[type="range"]:not(:disabled):active::-webkit-slider-thumb{scale:.9}
+.slider input[type="range"]:not(:disabled):hover::-moz-range-thumb,.slider input[type="range"]:focus-visible::-moz-range-thumb{scale:1.25;box-shadow:0 0 0 6px rgba(183,255,74,.45)}
+.slider input[type="range"]:disabled{--fill:#999;--rail:#ddd;--thumb:#ccc;--thumb-edge:#888;cursor:not-allowed}
+.slider span strong{display:inline-block;min-width:3.2ch;text-align:right;transition:scale .2s var(--ease-pop)}
+.slider:hover span strong,.slider:focus-within span strong{scale:1.25;transform-origin:100% 50%}
+
+/* ---------- SMALL EXTRAS ---------- */
+.summary-strip b,.three-readings strong,.detection-strip b{font-variant-numeric:tabular-nums}
+.summary-strip div:hover b,.detection-strip div:hover b{animation:qsBump .35s var(--ease-pop)}
+@keyframes qsBump{50%{transform:scale(1.12);transform-origin:0 50%}}
+.footer span:last-child{position:relative;padding-left:14px}
+.footer span:last-child::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;border-radius:50%;background:var(--lime);animation:qsPing 2s ease-out infinite;box-shadow:0 0 0 0 #b7ff4a99}
+
+/* ============================================================
+   FX UPDATE — small diamond cursor + readable-ticker tweaks
+   ============================================================ */
+
+/* Hollow diamond ring that trails the pointer + a precise centre dot.
+   Lime border with an ink hairline outside: visible on black, lime and paper alike,
+   and hollow, so nothing underneath is ever covered. */
+.cursor-ring,.cursor-dot{position:fixed;left:0;top:0;pointer-events:none;z-index:70;opacity:0;transition:opacity .25s;will-change:transform}
+.cursor-ring{width:0;height:0}
+.cursor-ring i{position:absolute;left:-13px;top:-13px;width:26px;height:26px;box-sizing:border-box;border:2px solid var(--lime);box-shadow:0 0 0 1.5px var(--ink),inset 0 0 0 1.5px var(--ink);rotate:45deg;transition:width .3s var(--ease-pop),height .3s var(--ease-pop),left .3s var(--ease-pop),top .3s var(--ease-pop),rotate .45s var(--ease-pop),background .2s,scale .15s}
+.cursor-ring.is-hot i{left:-22px;top:-22px;width:44px;height:44px;rotate:135deg;background:rgba(183,255,74,.22)}
+.cursor-ring.is-down i{scale:.7;background:rgba(183,255,74,.55)}
+.cursor-dot{width:0;height:0}
+.cursor-dot::before{content:"";position:absolute;left:-3px;top:-3px;width:6px;height:6px;background:var(--lime);box-shadow:0 0 0 1.5px var(--ink);rotate:45deg}
+@media (pointer:coarse){.cursor-ring,.cursor-dot{display:none}}
+
+/* Ticker: items are clickable shortcuts now, and a bit smaller so full phrases fit */
+.ticker-row span{font-size:clamp(12px,2vw,25px);cursor:pointer}
+.ticker-row span:active{background:var(--ink);color:var(--lime);-webkit-text-stroke:0}

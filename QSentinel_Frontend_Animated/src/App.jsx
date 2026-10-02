@@ -210,6 +210,154 @@ function MiniFingerprint({ data, showThreshold = false }) {
   );
 }
 
+/* ---------- VISUAL FX (additive, no effect on app logic) ---------- */
+const TILT_SELECTOR = ".move-card, .method-flow > div, .quick-start > div";
+
+function FX() {
+  const ringRef = useRef(null);
+  const dotRef = useRef(null);
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const fine = window.matchMedia("(pointer: fine)").matches;
+    if (reduce || !fine) return undefined;
+
+    const root = document.documentElement;
+    const ring = ringRef.current;
+    const dot = dotRef.current;
+    const HOT = "button, a, select, input, label, summary, [role='button'], .ticker-row span";
+    let raf = 0;
+    let x = -100, y = -100;   // real pointer
+    let rx = -100, ry = -100; // trailing ring
+
+    const tick = () => {
+      rx += (x - rx) * 0.2;
+      ry += (y - ry) * 0.2;
+      ring.style.transform = `translate3d(${rx}px, ${ry}px, 0)`;
+      root.style.setProperty("--mx", (x / window.innerWidth).toFixed(3));
+      root.style.setProperty("--my", (y / window.innerHeight).toFixed(3));
+      raf = Math.abs(x - rx) + Math.abs(y - ry) > 0.3 ? requestAnimationFrame(tick) : 0;
+    };
+
+    const onMove = (e) => {
+      x = e.clientX;
+      y = e.clientY;
+      ring.style.opacity = "1";
+      dot.style.opacity = "1";
+      dot.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      if (!raf) raf = requestAnimationFrame(tick);
+
+      const card = e.target.closest ? e.target.closest(TILT_SELECTOR) : null;
+      if (card) {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width;
+        const py = (e.clientY - r.top) / r.height;
+        card.style.setProperty("--rx", `${((0.5 - py) * 8).toFixed(2)}deg`);
+        card.style.setProperty("--ry", `${((px - 0.5) * 10).toFixed(2)}deg`);
+        card.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
+        card.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
+      }
+    };
+
+    const onOver = (e) => {
+      const hot = e.target.closest ? e.target.closest(HOT) : null;
+      ring.classList.toggle("is-hot", !!hot && !hot.disabled);
+    };
+
+    const onOut = (e) => {
+      const card = e.target.closest ? e.target.closest(TILT_SELECTOR) : null;
+      if (card && !card.contains(e.relatedTarget)) {
+        card.style.setProperty("--rx", "0deg");
+        card.style.setProperty("--ry", "0deg");
+      }
+    };
+
+    const onDown = () => ring.classList.add("is-down");
+    const onUp = () => ring.classList.remove("is-down");
+    const onLeaveWindow = () => { ring.style.opacity = "0"; dot.style.opacity = "0"; };
+
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("mousedown", onDown);
+    window.addEventListener("mouseup", onUp);
+    document.addEventListener("mouseover", onOver);
+    document.addEventListener("mouseout", onOut);
+    document.documentElement.addEventListener("mouseleave", onLeaveWindow);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mouseup", onUp);
+      document.removeEventListener("mouseover", onOver);
+      document.removeEventListener("mouseout", onOut);
+      document.documentElement.removeEventListener("mouseleave", onLeaveWindow);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <>
+      <div className="cursor-ring" ref={ringRef} aria-hidden="true"><i /></div>
+      <div className="cursor-dot" ref={dotRef} aria-hidden="true" />
+    </>
+  );
+}
+
+// Text that "decrypts" into place whenever it changes.
+function Scramble({ text }) {
+  const [out, setOut] = useState(text);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setOut(text);
+      return undefined;
+    }
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01#/<>";
+    const total = 18;
+    let frame = 0;
+    const id = setInterval(() => {
+      frame += 1;
+      const reveal = Math.floor((frame / total) * text.length);
+      setOut(
+        text
+          .split("")
+          .map((c, i) => (c === " " || i < reveal ? c : chars[Math.floor(Math.random() * chars.length)]))
+          .join("")
+      );
+      if (frame >= total) {
+        clearInterval(id);
+        setOut(text);
+      }
+    }, 35);
+    return () => clearInterval(id);
+  }, [text]);
+
+  return <>{out}</>;
+}
+
+function Ticker({ navigate }) {
+  const top = [
+    ["SIGN A MESSAGE", "/verify"],
+    ["ATTACK IT ON PURPOSE", "/simulate"],
+    ["READ THE FINGERPRINT", "/simulate"],
+    ["GET A CLEAR VERDICT", "/verify"],
+    ["EXPORT JSON & CSV", "/log"],
+  ];
+  const bottom = [
+    ["NO MACHINE LEARNING", "/how-it-works"],
+    ["6 ATTACK TYPES", "/simulate"],
+    ["REPLAY & FORGERY CHECKS", "/verify"],
+    ["EVERY TEST LOGGED", "/log"],
+    ["UNSURE? WE SAY INCONCLUSIVE", "/how-it-works"],
+  ];
+  const row = (items, cls) => (
+    <div className={`ticker-row ${cls}`}>
+      {[...items, ...items].map(([w, to], i) => (
+        <span key={`${w}-${i}`} onClick={() => navigate(to)} title="Open">{w}</span>
+      ))}
+    </div>
+  );
+  return <div className="ticker">{row(top, "")}{row(bottom, "rev")}</div>;
+}
+
 function App() {
   const [route, setRoute] = useState(path());
   const [online, setOnline] = useState(false);
@@ -358,6 +506,8 @@ function App() {
   return (
     <div className="site">
       <div className="noise-overlay" />
+      <FX />
+      <div className={`load-bar ${loading ? "on" : ""}`} aria-hidden="true" />
       <Header route={route} navigate={navigate} online={online} />
       <div className="page-transition" key={route}>
         {route === "/" && <Home navigate={navigate} online={online} events={events} lastAction={lastAction} />}
@@ -449,7 +599,7 @@ function VerdictBanner({ result, compact = false }) {
   const d = resultDecision(result);
   return (
     <div className={`verdict-banner ${decisionTone(d)} ${compact ? "compact" : ""}`}>
-      <div className="verdict-main">{decisionText(d)}</div>
+      <div className="verdict-main"><Scramble text={decisionText(d)} /></div>
       <div className="verdict-reason">{reasonFor(result)}</div>
     </div>
   );
@@ -469,6 +619,8 @@ function Home({ navigate, online, events, lastAction }) {
         </div>
         <div className="hero-badge"><span>Q</span><b>AXIS<br />SENTINEL</b></div>
       </section>
+
+      <Ticker navigate={navigate} />
 
       <section className="lime intro">
         <SectionTitle eyebrow="01 / THE IDEA" title="A SIGNAL YOU CAN READ." />
@@ -597,7 +749,7 @@ function ThreatLab(p) {
           {p.error && <div className="error">{p.error}</div>}
         </div>
         <div className="lab-result">
-          <div className={`result-orbit ${decisionTone(d)}`}><span/><span/><span/><b>{r ? decisionText(d) : "READY"}</b></div>
+          <div className={`result-orbit ${decisionTone(d)}`}><span/><span/><span/><b><Scramble text={r ? decisionText(d) : "READY"} /></b></div>
           <p className="result-caption">{r ? reasonFor(r) : "Run a scenario to reveal the channel fingerprint."}</p>
           {r?.fingerprint ? <div className="three-readings">{axisOrder.map((a) => <div key={a}><small>e{a}</small><strong>{fmt(fingerprintOf(r)[a])}</strong><i><em style={{width:`${Math.min(100, Number(fingerprintOf(r)[a] || 0)*100)}%`}}/></i></div>)}</div> : <EmptyState text={r ? "No error rates for this result. It was stopped by a protocol check before any quantum measurement." : "No run yet. Results will appear here."} compact/>}
         </div>
