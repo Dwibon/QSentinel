@@ -49,7 +49,6 @@ async function request(path, options = {}) {
   const text = await response.text();
 
   let data = {};
-
   if (text) {
     try {
       data = JSON.parse(text);
@@ -70,66 +69,110 @@ async function request(path, options = {}) {
   return data;
 }
 
-export function health() {
-  return request("/health");
-}
+export const health = () => request("/health");
 
-export function createSignature(payload) {
-  return request("/signature/create", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function verifySignature(payload) {
-  return request("/signature/verify", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function replaySignature(payload) {
-  return request("/signature/replay", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function simulate(payload) {
+export function simulate(attack = "none", overrides = {}) {
   return request("/simulate", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({
+      ...defaults,
+      ...overrides,
+      attack,
+    }),
   });
 }
 
-export function simulateReplay(payload) {
+export function replay() {
   return request("/simulate/replay", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(defaults),
   });
 }
 
-export function simulateUnauthorized(payload) {
+export function unauthorized() {
   return request("/simulate/unauthorized", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(defaults),
+  });
+}
+
+export function createSignature(values = {}) {
+  const nonce = values.nonce || `ui-${Date.now()}`;
+  const messageId =
+    values.message_id ||
+    `ui-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+  return request("/signature/create", {
+    method: "POST",
+    body: JSON.stringify({
+      message: values.message ?? defaults.message,
+      key: Number(values.key ?? defaults.key),
+      n_qubits: Number(values.n_qubits ?? defaults.n_qubits),
+      sentinel_fraction: Number(
+        values.sentinel_fraction ?? defaults.sentinel_fraction
+      ),
+      nonce,
+      message_id: messageId,
+    }),
+  });
+}
+
+export function verifySignature(values = {}) {
+  return request("/signature/verify", {
+    method: "POST",
+    body: JSON.stringify({
+      signature: values.signature,
+      message: values.message ?? defaults.message,
+      key: Number(values.key ?? defaults.key),
+      baseline: values.baseline ?? defaults.baseline,
+      attack: values.attack ?? "none",
+      attack_strength: Number(
+        values.attack_strength ?? defaults.attack_strength
+      ),
+      noise_p: Number(values.noise_p ?? defaults.noise_p),
+      alpha: Number(values.alpha ?? defaults.alpha),
+      verifier_id: values.verifier_id ?? "verifier",
+      registered_verifier_id:
+        values.registered_verifier_id ?? "verifier",
+    }),
+  });
+}
+
+export function replaySignature(values = {}) {
+  return request("/signature/replay", {
+    method: "POST",
+    body: JSON.stringify({
+      signature: values.signature,
+      message: values.message ?? defaults.message,
+      key: Number(values.key ?? defaults.key),
+      baseline: values.baseline ?? defaults.baseline,
+      attack: values.attack ?? "none",
+      attack_strength: Number(
+        values.attack_strength ?? defaults.attack_strength
+      ),
+      noise_p: Number(values.noise_p ?? defaults.noise_p),
+      alpha: Number(values.alpha ?? defaults.alpha),
+      verifier_id: values.verifier_id ?? "verifier",
+      registered_verifier_id:
+        values.registered_verifier_id ?? "verifier",
+    }),
+  });
+}
+
+export function forgery() {
+  return request("/simulate/forgery", {
+    method: "POST",
+    body: JSON.stringify(defaults),
+  });
+}
+
+export function impersonation() {
+  return request("/simulate/impersonation", {
+    method: "POST",
+    body: JSON.stringify(defaults),
   });
 }
 
 export function getEvents(limit = 1000) {
   return request(`/events?limit=${limit}`);
-}
-
-export function simulateForgery(payload) {
-  return request("/simulate/forgery", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-}
-
-export function simulateImpersonation(payload) {
-  return request("/simulate/impersonation", {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
 }
