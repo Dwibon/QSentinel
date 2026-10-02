@@ -704,11 +704,11 @@
    and hollow, so nothing underneath is ever covered. */
 .cursor-ring,.cursor-dot{position:fixed;left:0;top:0;pointer-events:none;z-index:70;opacity:0;transition:opacity .25s;will-change:transform}
 .cursor-ring{width:0;height:0}
-.cursor-ring i{position:absolute;left:-13px;top:-13px;width:26px;height:26px;box-sizing:border-box;border:2px solid var(--lime);box-shadow:0 0 0 1.5px var(--ink),inset 0 0 0 1.5px var(--ink);rotate:45deg;transition:width .3s var(--ease-pop),height .3s var(--ease-pop),left .3s var(--ease-pop),top .3s var(--ease-pop),rotate .45s var(--ease-pop),background .2s,scale .15s}
-.cursor-ring.is-hot i{left:-22px;top:-22px;width:44px;height:44px;rotate:135deg;background:rgba(183,255,74,.22)}
+.cursor-ring i{position:absolute;left:-8px;top:-8px;width:16px;height:16px;box-sizing:border-box;border:2px solid var(--lime);box-shadow:0 0 0 1.5px var(--ink),inset 0 0 0 1.5px var(--ink);rotate:45deg;transition:width .3s var(--ease-pop),height .3s var(--ease-pop),left .3s var(--ease-pop),top .3s var(--ease-pop),rotate .45s var(--ease-pop),background .2s,scale .15s}
+.cursor-ring.is-hot i{left:-14px;top:-14px;width:28px;height:28px;rotate:135deg;background:rgba(183,255,74,.22)}
 .cursor-ring.is-down i{scale:.7;background:rgba(183,255,74,.55)}
 .cursor-dot{width:0;height:0}
-.cursor-dot::before{content:"";position:absolute;left:-3px;top:-3px;width:6px;height:6px;background:var(--lime);box-shadow:0 0 0 1.5px var(--ink);rotate:45deg}
+.cursor-dot::before{content:"";position:absolute;left:-2px;top:-2px;width:4px;height:4px;background:var(--lime);box-shadow:0 0 0 1.5px var(--ink);rotate:45deg}
 @media (pointer:coarse){.cursor-ring,.cursor-dot{display:none}}
 
 /* Ticker: items are clickable shortcuts now, and a bit smaller so full phrases fit */
